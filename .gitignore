@@ -1,0 +1,105 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+eggs/
+parts/
+var/
+sdist/
+develop-eggs/
+.installed.cfg
+lib/
+lib64/
+*.pyo
+*.pyd
+.Python
+
+# Virtual environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Jupyter
+.ipynb_checkpoints
+*.ipynb
+
+# Data directories (large files)
+data/raw/
+data/processed/
+data/HAM10000/images
+data/HAM10000/HAM10000_metadata.csv
+data/HAM10000/masks/
+data/HAM10000/predicted_masks/
+data/HAM10000/cropped_lesions/
+data/HAM10000/bounding_boxes.csv
+data/splits/*.csv
+data/splits/*.json
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+!data/splits/.gitkeep
+!data/HAM10000/README.md
+
+# Checkpoints
+checkpoints/
+
+# Logs
+logs/
+*.log
+
+# Results
+results/
+
+# Wandb
+wandb/
+
+# Pytest / Coverage
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+nosetests.xml
+coverage.xml
+*.cover
+
+# MyPy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# LaTeX build artifacts
+paper/*.aux
+paper/*.bbl
+paper/*.blg
+paper/*.log
+paper/*.out
+paper/*.pdf
+paper/*.synctex.gz
+paper/*.fls
+paper/*.fdb_latexmk
+
+# Temporary files
+*.tmp
+*.bak
+*.orig

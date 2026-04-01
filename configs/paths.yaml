@@ -1,0 +1,16 @@
+# All paths relative to project root (data on D: due to C: space)
+project_root: "."
+data:
+  raw: "D:/skin_data/raw"
+  processed: "D:/skin_data/processed"
+  splits: "D:/skin_data/splits"
+  ham10000_metadata: "D:/skin_data/raw/HAM10000_metadata.csv"
+  images_dir: "D:/skin_data/raw/images"
+  masks_dir: "D:/skin_data/raw/masks"   # ISIC 2018 Task 1 masks (optional)
+checkpoints:
+  segmentation: "D:/skin_data/checkpoints/segmentation"
+  global_cls: "D:/skin_data/checkpoints/global_cls"
+  local_cls: "D:/skin_data/checkpoints/local_cls"
+  ensemble: "D:/skin_data/checkpoints/ensemble"
+logs: "D:/skin_data/logs"
+results: "D:/skin_data/results"

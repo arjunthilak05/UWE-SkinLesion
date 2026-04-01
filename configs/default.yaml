@@ -1,0 +1,180 @@
+# =============================================================================
+# Dual-Pathway Skin Lesion Classification — Master Configuration
+# =============================================================================
+
+# ---- Data ----
+data:
+  data_dir: "D:/skin_data/raw"
+  images_subdir: "images"
+  metadata_csv: "HAM10000_metadata.csv"
+  masks_dir: "D:/skin_data/raw/masks"
+  splits_dir: "D:/skin_data/splits"
+  image_size: 450                   # full-res resize for preprocessing
+  batch_size: 32
+  num_workers: 4
+  pin_memory: true
+  train_split: 0.7
+  val_split: 0.15
+  test_split: 0.15
+  n_folds: 5
+  seed: 42
+  class_names:
+    - akiec
+    - bcc
+    - bkl
+    - df
+    - mel
+    - nv
+    - vasc
+  class_counts:
+    akiec: 327
+    bcc: 514
+    bkl: 1099
+    df: 115
+    mel: 1113
+    nv: 6705
+    vasc: 142
+
+# ---- Segmentation (U-Net) ----
+segmentation:
+  encoder: "efficientnet-b2"
+  encoder_weights: "imagenet"
+  decoder_channels: [256, 128, 64, 32, 16]
+  input_size: 256
+  in_channels: 3
+  classes: 1                        # binary mask
+  epochs: 50
+  lr: 1.0e-3
+  weight_decay: 1.0e-4
+  optimizer: "adamw"
+  scheduler: "cosine"
+  warmup_epochs: 5
+  loss:
+    bce_weight: 0.5
+    dice_weight: 0.5
+  batch_size: 32
+  early_stopping:
+    monitor: "val_dice"
+    patience: 10
+    mode: "max"
+
+# ---- Global Classifier (EfficientNet-B4) ----
+global_classifier:
+  model_name: "efficientnet_b4"
+  pretrained: true
+  input_size: 380
+  num_classes: 7
+  drop_rate: 0.4
+  hidden_dim: 512
+  epochs: 60
+  lr: 3.0e-4
+  weight_decay: 1.0e-5
+  optimizer: "adamw"
+  scheduler: "cosine_warm_restarts"
+  scheduler_params:
+    T_0: 15
+    T_mult: 2
+    eta_min: 1.0e-6
+  label_smoothing: 0.1
+  mixup_alpha: 0.4
+  cutmix_alpha: 1.0
+  loss:
+    name: "focal"
+    gamma: 2.0
+    alpha: "auto"                   # computed from class weights
+  batch_size: 32
+  gradient_clip: 1.0
+  early_stopping:
+    monitor: "val_balanced_acc"
+    patience: 15
+    mode: "max"
+
+# ---- Local Classifier (ResNet-50) ----
+local_classifier:
+  model_name: "resnet50"
+  pretrained: true
+  input_size: 224
+  num_classes: 7
+  drop_rate: 0.4                    # was 0.3, match global
+  hidden_dim: 512
+  epochs: 60
+  lr: 3.0e-4                       # was 1e-4, match global
+  weight_decay: 1.0e-5
+  optimizer: "adamw"
+  scheduler: "cosine_warm_restarts"
+  scheduler_params:
+    T_0: 15                         # added, match global
+    T_mult: 2                       # added, match global
+    eta_min: 1.0e-6
+  label_smoothing: 0.1
+  mixup_alpha: 0.4                  # added
+  cutmix_alpha: 1.0                 # added
+  loss:
+    name: "focal"
+    gamma: 2.0
+    alpha: null                     # was "auto", sampler handles balance
+  batch_size: 32
+  gradient_clip: 1.0
+  crop_padding: 0.15              # fraction of bbox to pad when cropping
+  seg_checkpoint: null             # path to trained segmentation model
+  early_stopping:
+    monitor: "val_balanced_acc"
+    patience: 15
+    mode: "max"
+
+# ---- Ensemble ----
+ensemble:
+  temperature_tau: 1.5
+  calibration_method: "temperature_scaling"
+  calibration_lr: 0.01
+  calibration_max_iter: 200
+  global_weight: 0.5
+  local_weight: 0.5
+  calibration_split: 0.5           # fraction of val set used for calibration
+
+# ---- Augmentation ----
+augmentation:
+  random_resized_crop:
+    scale: [0.8, 1.0]
+    ratio: [0.9, 1.1]
+  horizontal_flip_p: 0.5
+  vertical_flip_p: 0.5
+  rotate90_p: 0.5
+  transpose_p: 0.5
+  optical_distortion_p: 0.3
+  grid_distortion_p: 0.3
+  elastic_transform_p: 0.3
+  distortion_oneof_p: 0.3
+  clahe_p: 0.5
+  clahe_clip_limit: 4.0
+  brightness_contrast_p: 0.5
+  brightness_limit: 0.2
+  contrast_limit: 0.2
+  color_oneof_p: 0.5
+  hue_shift_limit: 20
+  sat_shift_limit: 30
+  val_shift_limit: 20
+  hue_sat_p: 0.5
+  coarse_dropout_p: 0.3
+  coarse_dropout_max_holes: 8
+  coarse_dropout_max_height: 32
+  coarse_dropout_max_width: 32
+  gauss_noise_p: 0.2
+  gauss_noise_var_limit: [10.0, 50.0]
+  normalize:
+    mean: [0.7635, 0.5461, 0.5705]  # HAM10000 per-channel mean
+    std: [0.1404, 0.1521, 0.1697]   # HAM10000 per-channel std
+  tta_n_augments: 10
+
+# ---- Training ----
+training:
+  seed: 42
+  device: "cuda"
+  mixed_precision: true
+  wandb_project: "skin-lesion-dual-pathway"
+  wandb_entity: null
+  log_every_n_steps: 50
+  save_top_k: 3
+  checkpoint_dir: "D:/skin_data/checkpoints"
+  results_dir: "D:/skin_data/results"
+  log_dir: "D:/skin_data/logs"
